@@ -11,7 +11,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter()) /* (пример глобального подключения кастомного обработчика ошибок - в д.с создаем новый экземпляр класса) */
 
-  app.use(mainLogger); /* (подключаем кастомный миддлвер) */
+  // app.use(mainLogger); /* (подключаем кастомный миддлвер) */
 
   await app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 }
