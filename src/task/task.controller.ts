@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Redirect, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Header, HttpCode, Param, ParseIntPipe, Post, Redirect, UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ITask } from "./task.interface";
 import { TaskService } from "./task.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
+import { AllExceptionsFilter } from "@src/exception-filters/exception.filter";
+import { EmailPipe } from "./pipes/email.pipe";
 
 /* (контроллеры отвечают за определение маршрутов, помечаем соответствующим декоратором) */
 /* (регистрируем в модуле (в app.module.ts в д.с)) */
+@UseFilters(AllExceptionsFilter) /* (подключаем кастомные фильтры для ошибок) */
 @Controller("task") /* (можно передать общее название участка пути, например "/api", или обьект с более подробными настройками) */
 export class TaskController { /* (в названии документа и названии класса принято указывать, что это контроллер) */
 
@@ -34,7 +37,8 @@ export class TaskController { /* (в названии документа и на
     }
 
     @Get(":id") /* (пример получения обьекта по id) */
-    getTaskById(@Param("id", {transform: (id) => Number(id)}) id: number): ITask { /* (в Param в опциях можем сразу преобразовать пришедшие данные) */
+    // getTaskById(@Param("id", {transform: (id) => Number(id)}) id: number): ITask { /* (в Param в опциях можем сразу преобразовать пришедшие данные) */
+    getTaskById(@Param("id", ParseIntPipe) id: number): ITask {  /* (преобразуем строковый id с помощью встроенного пайпа, можно определять через new ParseIntPipe({}) и передавать обьект с опциями, например сообщение для ошибки) */
         return this.taskService.getTaskById(id);
     }
 
@@ -47,5 +51,10 @@ export class TaskController { /* (в названии документа и на
     @Post()
     createTask(@Body() task: CreateTaskDto): ITask {
         return this.taskService.createTask(task);
+    }
+
+    @Get("email/:email")
+    getTasksByEmail(@Param("email", EmailPipe) email: string): ITask[] { /* (пришедший в запросе email валидируем с помощью кастомного пайпа) */
+        return this.taskService.getTasksByEmail(email);
     }
  }
